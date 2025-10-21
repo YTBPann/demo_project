@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
-using OpenIDApp.Data;
+using OpenIDApp.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 var builder = WebApplication.CreateBuilder(args);
 
 // mysql
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<OpenIDContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(8, 0, 36))

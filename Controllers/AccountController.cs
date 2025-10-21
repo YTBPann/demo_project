@@ -6,8 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using OpenIDApp.Data;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 using AppUser = OpenIDApp.Models.User;
+using OpenIDApp.Models;
 
 namespace OpenIDApp.Controllers
 {
@@ -19,39 +22,63 @@ namespace OpenIDApp.Controllers
             _context = context;
         }
 
-        public IActionResult Login()
+        [AllowAnonymous]
+        public IActionResult Login(string provider = GoogleDefaults.AuthenticationScheme, string? returnUrl = null)
         {
-            string redirectUrl = Url.Action("GoogleResponse", "Account");
+            var scheme = string.IsNullOrWhiteSpace(provider) ? GoogleDefaults.AuthenticationScheme : provider;
+            var redirectUrl = Url.Action(nameof(ExternalResponse), "Account", new { provider = scheme, returnUrl });
             var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                properties.Items["returnUrl"] = returnUrl;
+            }
+
+            return Challenge(properties, scheme);
         }
 
-        public async Task<IActionResult> GoogleResponse()
+        [AllowAnonymous]
+        public async Task<IActionResult> ExternalResponse(string provider = GoogleDefaults.AuthenticationScheme, string? returnUrl = null)
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var externalClaims = result.Principal?.Identities.FirstOrDefault()?.Claims;
-
-            var email = externalClaims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var name = externalClaims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-            var id = externalClaims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            var picture = externalClaims?.FirstOrDefault(c => c.Type == "picture")?.Value;
-
-            if (email != null)
+            if (!result.Succeeded)
             {
-                var user = _context.Users.FirstOrDefault(u => u.Email == email);
-                if (user == null)
+                return RedirectToAction("Index", "Home");
+            }
+
+            var externalClaims = result.Principal?.Identities.FirstOrDefault()?.Claims ?? Enumerable.Empty<Claim>();
+            var email = externalClaims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var name = externalClaims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var providerKey = externalClaims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var picture = externalClaims.FirstOrDefault(c => c.Type == "picture")?.Value;
+
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var scheme = string.IsNullOrWhiteSpace(provider) ? GoogleDefaults.AuthenticationScheme : provider;
+
+            var existingLogin = await _context.UserLogins
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.Provider == scheme && l.ProviderId == providerKey);
+
+            AppUser user;
+
+            if (existingLogin != null)
+            {
+                user = existingLogin.User;
+            }
+            else
+            {
+                AppUser? existingUser = null;
+
+                if (!string.IsNullOrEmpty(email))
                 {
                     // Gán role mặc định khi lần đầu đăng nhập
-                    user = new AppUser
-                    {
-                        GoogleId = id,
-                        Name = name ?? "Người dùng",
-                        Email = email,
-                        Picture = picture,
-                        Role = "guest"
-                    };
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
+                    existingUser = await _context.Users
+                        .Include(u => u.Logins)
+                        .FirstOrDefaultAsync(u => u.Email == email);
                 }
 
                 // Lưu user vào Claims
