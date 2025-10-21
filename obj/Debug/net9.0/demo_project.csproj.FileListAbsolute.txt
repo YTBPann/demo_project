@@ -1,5 +1,6 @@
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\appsettings.json
+C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\client_secret_98695732411-4t4a02jlk29vgjuca5m3lqmcbff8paol.apps.googleusercontent.com.json
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.staticwebassets.runtime.json
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.staticwebassets.endpoints.json
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.exe

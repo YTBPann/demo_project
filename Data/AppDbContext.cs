@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using OpenIDApp.Models;
 
 namespace OpenIDApp.Data
 {
@@ -7,14 +8,5 @@ namespace OpenIDApp.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
-    }
-
-    public class User
-    {
-        public int UserId { get; set; }
-        public string Email { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string Role { get; set; } = "guest";
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

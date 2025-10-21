@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Chào mừng";
+}
+
+@if (ViewBag.IsLoggedIn == true)
+{
+    <div class="text-center mt-5">
+        <h2>Chào mừng <span style="color: #007bff;">@ViewBag.UserName</span>!</h2>
+        <p>Hiện bạn đang là <strong>@ViewBag.Role</strong> của trường.</p>
+    </div>
+}
+else
+{
+    <div class="text-center mt-5">
+        <h2>Hello 👋</h2>
+        <p>Chào mừng đến với <strong>Demo Project</strong></p>
+        <a class="btn btn-primary mt-3" href="/Account/Login">Đăng nhập bằng Google</a>
+    </div>
+}

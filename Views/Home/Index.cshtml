@@ -1,2 +1,9 @@
-﻿<h1>Chào mừng đến hệ thống thi!</h1>
-<a href="/Account/Login">Đăng nhập bằng Google</a>
+﻿@if (User.Identity.IsAuthenticated)
+{
+    <p>Xin chào, @User.Identity.Name!</p>
+//    <a href="/Account/Logout">Đăng xuất</a>
+}
+else
+{
+    <a href="/Account/Login">Đăng nhập bằng Google</a>
+}
