@@ -2,6 +2,22 @@
   "version": 3,
   "targets": {
     "net9.0": {
+      "AspNet.Security.OAuth.GitHub/9.4.1": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/AspNet.Security.OAuth.GitHub.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/AspNet.Security.OAuth.GitHub.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
       "Humanizer.Core/2.14.1": {
         "type": "package",
         "compile": {
@@ -1444,6 +1460,21 @@
     }
   },
   "libraries": {
+    "AspNet.Security.OAuth.GitHub/9.4.1": {
+      "sha512": "a8sTvOMlDlh8g9OUvxK3NUtNP8lnOCKZr1RyIiDVMc8nCiGMf0cFjkUfsnfP0q8SpkRjMtIwYT0ig0gMgeoFDA==",
+      "type": "package",
+      "path": "aspnet.security.oauth.github/9.4.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "README.md",
+        "aspnet.security.oauth.github.9.4.1.nupkg.sha512",
+        "aspnet.security.oauth.github.nuspec",
+        "lib/net9.0/AspNet.Security.OAuth.GitHub.dll",
+        "lib/net9.0/AspNet.Security.OAuth.GitHub.xml"
+      ]
+    },
     "Humanizer.Core/2.14.1": {
       "sha512": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw==",
       "type": "package",
@@ -3955,6 +3986,7 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "AspNet.Security.OAuth.GitHub >= 9.4.1",
       "Microsoft.AspNetCore.Authentication.Cookies >= 2.3.0",
       "Microsoft.AspNetCore.Authentication.Google >= 9.0.10",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.10",
@@ -4011,6 +4043,10 @@
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
+          "AspNet.Security.OAuth.GitHub": {
+            "target": "Package",
+            "version": "[9.4.1, )"
+          },
           "Microsoft.AspNetCore.Authentication.Cookies": {
             "target": "Package",
             "version": "[2.3.0, )"

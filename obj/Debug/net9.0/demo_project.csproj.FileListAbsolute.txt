@@ -8,6 +8,7 @@ C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.deps
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.runtimeconfig.json
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.pdb
+C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\AspNet.Security.OAuth.GitHub.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Humanizer.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.Google.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll

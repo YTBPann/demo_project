@@ -132,6 +132,27 @@ namespace OpenIDApp.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Name ?? "Người dùng"),
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new Claim(ClaimTypes.Role, user.Role ?? "guest"),
+                new Claim("picture", user.Picture ?? "")
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+
+            var loginRecord = await _context.UserLogins.FirstOrDefaultAsync(l => l.ProviderId == providerKey);
+            if (loginRecord != null && loginRecord.UserId != user.Id)
+            {
+                loginRecord.UserId = user.Id;
+                _context.UserLogins.Update(loginRecord);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction("Welcome", "Home");
         }
         public async Task<IActionResult> Logout()
@@ -146,113 +167,3 @@ namespace OpenIDApp.Controllers
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*{
-    public class AccountController : Controller
-    {
-        private readonly AppDbContext _context;
-        public AccountController(AppDbContext context)
-        {
-            _context = context;
-        }
-
-        public IActionResult Login()
-        {
-            string redirectUrl = Url.Action("GoogleResponse", "Account");
-            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-        }
-
-        public async Task<IActionResult> GoogleResponse()
-        {
-            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var claims = result.Principal?.Identities.FirstOrDefault()?.Claims;
-            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-            var id = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            var picture = claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
-
-            if (email != null)
-            {
-                var user = _context.Users.FirstOrDefault(u => u.Email == email);
-                if (user == null)
-                {
-                    // set role mặc định
-                    user = new AppUser
-                    {
-                        GoogleId = id,
-                        Name = name,
-                        Email = email,
-                        Picture = picture,
-                        Role = "guest"
-                    };
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
-                }
-
-                // lưu user vào Claims (Session)
-                var claimsIdentity = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, user.Name),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role)
-                }, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    new AuthenticationProperties());
-
-                // return RedirectToAction("Welcome", "Home");
-                // Điều hướng tùy theo Role 
-                if (user.Role == "teacher")
-                    return RedirectToAction("Index", "Teacher");
-                else
-                    return RedirectToAction("Index", "Student");
-      
-            }
-
-            return RedirectToAction("Index", "Home");
-        }
-
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
-        }
-
-        public IActionResult AccessDenied(string? returnUrl = null)
-        {
-            return View();
-        }
-    }
-}
-*/

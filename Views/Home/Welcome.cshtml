@@ -1,11 +1,46 @@
 @{
     ViewData["Title"] = "Chào mừng";
     var userName = ViewBag.UserName as string ?? "bạn";
-    var role = ViewBag.Role as string ?? "thành viên";
+
+    // Lấy role trực tiếp từ Claims trong cookie đăng nhập
+    var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "guest";
+    string roleDisplay = roleClaim switch
+    {
+        "student" => "sinh viên",
+        "teacher" => "giáo viên",
+        "admin" => "quản trị viên",
+        "guest" => "khách",
+        _ => "thành viên"
+    };
 }
 
 <div class="welcome-card text-center py-5">
-    <h2 class="fw-bold mb-3">Chào mừng @userName đến với Demo Project</h2>
-    <p class="lead">Hiện bạn đang là <strong>@role</strong> của chúng tôi.</p>
-    <a class="btn btn-outline-primary mt-4" asp-controller="Home" asp-action="Index">Quay về trang chủ</a>
+    <h2 class="fw-bold mb-3">
+        Chào mừng @userName đến với Demo Project
+    </h2>
+    <p class="lead">
+        Hiện bạn đang là 
+        <span class="badge 
+            @(roleClaim == "admin" ? "bg-danger" : 
+              roleClaim == "teacher" ? "bg-warning text-dark" : 
+              roleClaim == "student" ? "bg-primary" : 
+              "bg-secondary")">
+            @roleDisplay
+        </span>
+        của chúng tôi.
+    </p>
+    <a class="btn btn-outline-primary mt-4" asp-controller="Home" asp-action="Index">
+        Quay về trang chủ
+    </a>
 </div>
+
+<style>
+    .welcome-card {
+        max-width: 700px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, #f9f9f9, #e9f5ff);
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+</style>

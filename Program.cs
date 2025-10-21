@@ -58,6 +58,13 @@ builder.Services.AddAuthentication(options =>
             identity.AddClaim(new Claim("picture", picture));
         }
     };
+})
+
+.AddGitHub(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
+    options.CallbackPath = "/signin-github";
 });
 
 // mvc 

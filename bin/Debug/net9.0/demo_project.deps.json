@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v9.0": {
       "demo_project/1.0.0": {
         "dependencies": {
+          "AspNet.Security.OAuth.GitHub": "9.4.1",
           "Microsoft.AspNetCore.Authentication.Cookies": "2.3.0",
           "Microsoft.AspNetCore.Authentication.Google": "9.0.10",
           "Microsoft.EntityFrameworkCore.Tools": "9.0.10",
@@ -15,6 +16,14 @@
         },
         "runtime": {
           "demo_project.dll": {}
+        }
+      },
+      "AspNet.Security.OAuth.GitHub/9.4.1": {
+        "runtime": {
+          "lib/net9.0/AspNet.Security.OAuth.GitHub.dll": {
+            "assemblyVersion": "9.4.1.0",
+            "fileVersion": "9.400.125.48035"
+          }
         }
       },
       "Humanizer.Core/2.14.1": {
@@ -769,6 +778,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "AspNet.Security.OAuth.GitHub/9.4.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-a8sTvOMlDlh8g9OUvxK3NUtNP8lnOCKZr1RyIiDVMc8nCiGMf0cFjkUfsnfP0q8SpkRjMtIwYT0ig0gMgeoFDA==",
+      "path": "aspnet.security.oauth.github/9.4.1",
+      "hashPath": "aspnet.security.oauth.github.9.4.1.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",

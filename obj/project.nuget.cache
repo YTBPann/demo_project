@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "ZHkAV1c3VPM=",
+  "dgSpecHash": "xHENCjWUmJU=",
   "success": true,
   "projectFilePath": "C:\\Users\\himar\\Desktop\\bmtt_ttnt\\demo_project\\demo_project.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\himar\\.nuget\\packages\\aspnet.security.oauth.github\\9.4.1\\aspnet.security.oauth.github.9.4.1.nupkg.sha512",
     "C:\\Users\\himar\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\himar\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.3.0\\microsoft.aspnetcore.authentication.2.3.0.nupkg.sha512",
     "C:\\Users\\himar\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.3.0\\microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512",
