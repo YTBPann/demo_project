@@ -8,6 +8,12 @@ namespace OpenIDApp.Controllers
     {
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                // Nếu đã đăng nhập rồi thì tự chuyển sang trang chào mừng
+                return RedirectToAction("Welcome", "Home");
+            }
+
             return View();
         }
 
@@ -30,5 +36,6 @@ namespace OpenIDApp.Controllers
 
             return View();
         }
+        
     }
 }

@@ -29,21 +29,23 @@ namespace OpenIDApp.Controllers
         public async Task<IActionResult> GoogleResponse()
         {
             var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var claims = result.Principal?.Identities.FirstOrDefault()?.Claims;
-            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-            var id = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            var picture = claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
+            var externalClaims = result.Principal?.Identities.FirstOrDefault()?.Claims;
+
+            var email = externalClaims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var name = externalClaims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+            var id = externalClaims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var picture = externalClaims?.FirstOrDefault(c => c.Type == "picture")?.Value;
 
             if (email != null)
             {
                 var user = _context.Users.FirstOrDefault(u => u.Email == email);
                 if (user == null)
                 {
+                    // Gán role mặc định khi lần đầu đăng nhập
                     user = new AppUser
                     {
                         GoogleId = id,
-                        Name = name,
+                        Name = name ?? "Người dùng",
                         Email = email,
                         Picture = picture,
                         Role = "guest"
@@ -52,7 +54,8 @@ namespace OpenIDApp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                var claims = new List<Claim>
+                // Lưu user vào Claims
+                var userClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Name),
                     new Claim(ClaimTypes.Email, user.Email),
@@ -61,17 +64,17 @@ namespace OpenIDApp.Controllers
 
                 if (!string.IsNullOrEmpty(user.Picture))
                 {
-                    claims.Add(new Claim("picture", user.Picture));
+                    userClaims.Add(new Claim("picture", user.Picture));
                 }
 
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsIdentity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
                     new AuthenticationProperties());
 
-                return RedirectToAction("Welcome", "Home");
+                return RedirectToAction("Index", "Home");
             }
 
             return RedirectToAction("Index", "Home");
