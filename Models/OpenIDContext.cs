@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using DemoOpenID.Models;
 
-namespace DemoOpenID.Models
+namespace OpenIDApp.Models
 {
     public class OpenIDContext : DbContext
     {

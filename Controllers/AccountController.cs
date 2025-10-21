@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OpenIDApp.Data;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +15,8 @@ namespace OpenIDApp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AppDbContext _context;
-        public AccountController(AppDbContext context)
+        private readonly OpenIDContext _context;
+        public AccountController(OpenIDContext context)
         {
             _context = context;
         }
@@ -75,38 +74,66 @@ namespace OpenIDApp.Controllers
 
                 if (!string.IsNullOrEmpty(email))
                 {
-                    // Gán role mặc định khi lần đầu đăng nhập
                     existingUser = await _context.Users
                         .Include(u => u.Logins)
                         .FirstOrDefaultAsync(u => u.Email == email);
                 }
 
-                // Lưu user vào Claims
-                var userClaims = new List<Claim>
+                user = existingUser ?? new AppUser
                 {
-                    new Claim(ClaimTypes.Name, user.Name),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role)
+                    Name = !string.IsNullOrWhiteSpace(name) ? name : (email ?? "Người dùng"),
+                    Email = email,
+                    Picture = picture,
+                    Role = "guest"
                 };
 
-                if (!string.IsNullOrEmpty(user.Picture))
+                if (existingUser == null)
                 {
-                    userClaims.Add(new Claim("picture", user.Picture));
+                    _context.Users.Add(user);
                 }
 
-                var claimsIdentity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var login = new UserLogin
+                {
+                    Provider = scheme,
+                    ProviderId = providerKey,
+                    User = user
+                };
 
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    new AuthenticationProperties());
+                _context.UserLogins.Add(login);
+            }
+            var updated = false;
 
-                return RedirectToAction("Index", "Home");
+            if (!string.IsNullOrWhiteSpace(name) && user.Name != name)
+            {
+                user.Name = name;
+                updated = true;
+            }
+            if (!string.IsNullOrWhiteSpace(email) && user.Email != email)
+            {
+                user.Email = email;
+                updated = true;
             }
 
-            return RedirectToAction("Index", "Home");
-        }
+            if (!string.IsNullOrWhiteSpace(picture) && user.Picture != picture)
+            {
+                user.Picture = picture;
+                updated = true;
+            }
 
+            if (string.IsNullOrWhiteSpace(user.Role))
+            {
+                user.Role = "guest";
+                updated = true;
+            }
+
+            if (updated)
+            {
+                _context.Users.Update(user);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Welcome", "Home");
+        }
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -119,6 +146,34 @@ namespace OpenIDApp.Controllers
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*{
     public class AccountController : Controller

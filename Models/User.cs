@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DemoOpenID.Models
+namespace OpenIDApp.Models
 {
     [Table("users")]
     public class User
