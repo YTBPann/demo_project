@@ -9,17 +9,18 @@
 
     <div class="auth-options d-flex justify-content-center flex-wrap gap-4">
 
-        <a asp-controller="Account" asp-action="Login" asp-route-provider="GitHub" class="card login-card shadow-sm text-decoration-none" style="width: 150px;">
+        <a asp-controller="Account" asp-action="Login" asp-route-provider="GitHub" class="auth-card text-decoration-none">
             <img src="~/images/github.png" alt="Github" width="64" height="64" style="border-radius: 12px;" />
             <span class="auth-card__label">Đăng nhập bằng GitHub</span>
         </a>
 
-        <a class="btn btn-danger mx-2" asp-controller="Account" asp-action="Login" asp-route-provider="Google">
+        <a asp-controller="Account" asp-action="Login" asp-route-provider="Facebook" class="auth-card google text-decoration-none">
             <img src="~/images/facebook.png" alt="Facebook" width="64" height="64" style="border-radius: 12px;" />
             <span class="auth-card__label">Đăng nhập bằng Facebook</span>
         </a>
 
-        <a asp-controller="Account" asp-action="Login" class="auth-card google text-decoration-none">
+        <!-- <a asp-controller="Account" asp-action="Login" class="auth-card google text-decoration-none"> -->
+        <a asp-controller="Account" asp-action="Login" asp-route-provider="Google" class="auth-card google text-decoration-none">
             <img src="~/images/google.png" alt="Google" width="64" height="64" style="border-radius: 12px;" />
             <span class="auth-card__label">Đăng nhập bằng Google</span>
         </a>
