@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIDApp.Data;
+using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 
 using AppUser = OpenIDApp.Models.User;
 
@@ -51,19 +52,26 @@ namespace OpenIDApp.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                var claimsIdentity = new ClaimsIdentity(new[]
+                var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Name),
                     new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.Role, user.Role)
-                }, CookieAuthenticationDefaults.AuthenticationScheme);
+                };
+
+                if (!string.IsNullOrEmpty(user.Picture))
+                {
+                    claims.Add(new Claim("picture", user.Picture));
+                }
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(
                     CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity),
                     new AuthenticationProperties());
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Welcome", "Home");
             }
 
             return RedirectToAction("Index", "Home");

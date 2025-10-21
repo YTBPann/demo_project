@@ -1,9 +1,38 @@
-﻿@if (User.Identity.IsAuthenticated)
-{
-    <p>Xin chào, @User.Identity.Name!</p>
-//    <a href="/Account/Logout">Đăng xuất</a>
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
 }
-else
-{
-    <a href="/Account/Login">Đăng nhập bằng Google</a>
-}
+
+<div class="home-hero text-center py-5">
+    <h1 class="display-5 fw-bold mb-3">Chào mừng bạn đến với Demo Project</h1>
+    <p class="lead text-muted mb-5">Chọn một trong các nền tảng OpenID dưới đây để đăng nhập.</p>
+
+    <div class="auth-options d-flex justify-content-center flex-wrap gap-4">
+        <div class="auth-card github disabled">
+            <div class="auth-card__icon">🐙</div>
+            <span class="auth-card__label">GitHub</span>
+            <small class="text-muted">Sắp ra mắt</small>
+        </div>
+        <div class="auth-card facebook disabled">
+            <div class="auth-card__icon">📘</div>
+            <span class="auth-card__label">Facebook</span>
+            <small class="text-muted">Sắp ra mắt</small>
+        </div>
+        <a asp-controller="Account" asp-action="Login" class="auth-card google text-decoration-none">
+            <div class="auth-card__icon">G</div>
+            <span class="auth-card__label">Đăng nhập bằng Google</span>
+        </a>
+    </div>
+
+    @if (isAuthenticated)
+    {
+        <div class="mt-5">
+            <p class="text-muted mb-3">Bạn đã đăng nhập với tên <strong>@User.Identity?.Name</strong>.</p>
+            <a class="btn btn-primary" asp-controller="Home" asp-action="Welcome">Đi đến trang chào mừng</a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mt-5">Nhấn vào biểu tượng Google để bắt đầu trải nghiệm.</p>
+    }
+</div>

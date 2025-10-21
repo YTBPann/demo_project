@@ -29,3 +29,80 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.home-hero {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.auth-card {
+  width: 200px;
+  padding: 24px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background-color: #ffffff;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+}
+
+.auth-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
+}
+
+.auth-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  pointer-events: none;
+}
+
+.auth-card__icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.auth-card.github .auth-card__icon {
+  background-color: #181717;
+}
+
+.auth-card.facebook .auth-card__icon {
+  background-color: #1877f2;
+}
+
+.auth-card.google .auth-card__icon {
+  background: conic-gradient(#ea4335 0deg 90deg, #fbbc05 90deg 180deg, #34a853 180deg 270deg, #4285f4 270deg 360deg);
+  color: #202124;
+  font-weight: 800;
+  font-family: 'Product Sans', 'Google Sans', Arial, sans-serif;
+}
+
+.auth-card.google {
+  text-decoration: none;
+}
+
+.auth-card__label {
+  font-weight: 600;
+}
+
+.welcome-card {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 32px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.12), rgba(52, 168, 83, 0.12));
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+}
