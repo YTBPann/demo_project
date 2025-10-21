@@ -8,20 +8,33 @@
     <p class="lead text-muted mb-5">Chọn một trong các nền tảng dưới đây để đăng nhập.</p>
 
     <div class="auth-options d-flex justify-content-center flex-wrap gap-4">
-        <div class="auth-card github disabled">
-            <div class="auth-card__icon">🐙</div>
-            <span class="auth-card__label">GitHub</span>
-            <small class="text-muted">Sắp ra mắt</small>
-        </div>
-        <div class="auth-card facebook disabled">
-            <div class="auth-card__icon">📘</div>
-            <span class="auth-card__label">Facebook</span>
-            <small class="text-muted">Sắp ra mắt</small>
-        </div>
+
+        <a asp-controller="Account" asp-action="Login" class="auth-card google text-decoration-none"">
+            <img src="~/images/github.png" alt="Github" width="64" height="64" style="border-radius: 12px;" />
+            <span class="auth-card__label">Đăng nhập bằng GitHub</span>
+        </a>
+
+        <a asp-controller="Account" asp-action="Login" class="auth-card google text-decoration-none"">
+            <img src="~/images/facebook.png" alt="Facebook" width="64" height="64" style="border-radius: 12px;" />
+            <span class="auth-card__label">Đăng nhập bằng Facebook</span>
+        </a>
+
         <a asp-controller="Account" asp-action="Login" class="auth-card google text-decoration-none">
-            <div class="auth-card__icon">G</div>
+            <img src="~/images/google.png" alt="Google" width="64" height="64" style="border-radius: 12px;" />
             <span class="auth-card__label">Đăng nhập bằng Google</span>
         </a>
+
+        <div class="auth-card facebook disabled">
+            <img src="~/images/microsoft.png" alt="Microsoft" width="64" height="64" style="border-radius: 12px;" />
+            <span class="auth-card__label">Microsoft</span>
+            <small class="text-muted">Sắp ra mắt</small>
+        </div>
+
+        <div class="auth-card facebook disabled">
+            <img src="~/images/discord.png" alt="Discord" width="64" height="64" style="border-radius: 12px;" />
+            <span class="auth-card__label">Discord</span>
+            <small class="text-muted">Sắp ra mắt</small>
+        </div>
     </div>
 
     @if (isAuthenticated)
