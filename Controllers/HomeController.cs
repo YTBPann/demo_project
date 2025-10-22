@@ -8,9 +8,8 @@ namespace OpenIDApp.Controllers
     {
         public IActionResult Index()
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity.IsAuthenticated) // Nếu đã đăng nhập rồi thì tự chuyển sang trang chào mừng
             {
-                // Nếu đã đăng nhập rồi thì tự chuyển sang trang chào mừng
                 return RedirectToAction("Welcome", "Home");
             }
 
@@ -37,5 +36,28 @@ namespace OpenIDApp.Controllers
             return View();
         }
         
+        [Authorize(Roles = "admin")]
+        public IActionResult AdminDashboard()
+        {
+            ViewBag.Title = "Bảng điều khiển quản trị";
+            ViewBag.UserName = User.FindFirstValue(ClaimTypes.Name);
+            return View("AdminDashboard");
+        }
+
+        [Authorize(Roles = "teacher")]
+        public IActionResult TeacherDashboard()
+        {
+            ViewBag.Title = "Trang giảng viên";
+            ViewBag.UserName = User.FindFirstValue(ClaimTypes.Name);
+            return View("TeacherDashboard");
+        }
+
+        [Authorize(Roles = "student")]
+        public IActionResult StudentDashboard()
+        {
+            ViewBag.Title = "Trang sinh viên";
+            ViewBag.UserName = User.FindFirstValue(ClaimTypes.Name);
+            return View("StudentDashboard");
+        }
     }
 }

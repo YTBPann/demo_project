@@ -153,6 +153,21 @@ namespace OpenIDApp.Controllers
                 await _context.SaveChangesAsync();
             }
 
+            switch (user.Role?.ToLower())
+            {
+                case "admin":
+                    return RedirectToAction("AdminDashboard", "Home");
+
+                case "teacher":
+                    return RedirectToAction("TeacherDashboard", "Home");
+
+                case "student":
+                    return RedirectToAction("StudentDashboard", "Home");
+
+                default:
+                    return RedirectToAction("Welcome", "Home");
+            }
+
             return RedirectToAction("Welcome", "Home");
         }
         public async Task<IActionResult> Logout()

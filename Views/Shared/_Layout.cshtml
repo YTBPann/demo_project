@@ -30,6 +30,29 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {       
+                            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
+
+                            if (role == "admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="AdminDashboard">Trang quản trị</a>
+                                </li>
+                            }
+                            else if (role == "teacher")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="TeacherDashboard">Trang giảng viên</a>
+                                </li>
+                            }
+                            else if (role == "student")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Home" asp-action="StudentDashboard">Trang sinh viên</a>
+                                </li>
+                            }
+                        }
                     </ul>
                     <ul class="navbar-nav">
                         @if (HttpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
@@ -49,7 +72,7 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-success" asp-controller="Account" asp-action="Login">Đăng nhập bằng Google</a>
+                                <a class="nav-link text-success" asp-controller="Account" asp-action="Login">Đăng nhập</a>
                             </li>
                         }
                     </ul>
@@ -65,7 +88,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - demo_project - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - demo_project  <!-- <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy </a> -->
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

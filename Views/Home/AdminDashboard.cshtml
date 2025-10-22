@@ -1,0 +1,8 @@
+@{
+    ViewData["Title"] = "Trang Quản trị";
+}
+<div class="container text-center mt-5">
+    <h2>Xin chào, @ViewBag.UserName 👑</h2>
+    <p>Bạn đang ở khu vực quản trị hệ thống.</p>
+    <a class="btn btn-outline-danger" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+</div>
