@@ -1,0 +1,47 @@
+@model IEnumerable<OpenIDApp.Models.User>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Quản lý người dùng</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Tên</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Cập nhật</th>
+                <th>Xóa</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Name</td>
+                    <td>@user.Email</td>
+                    <td>@user.Role</td>
+                    <td>
+                        <form asp-action="UpdateRole" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <select name="newRole" class="form-select d-inline w-auto">
+                                <option value="guest" selected="@((user.Role=="guest"))">Khách</option>
+                                <option value="student" selected="@((user.Role=="student"))">Sinh viên</option>
+                                <option value="teacher" selected="@((user.Role=="teacher"))">Giảng viên</option>
+                                <option value="admin" selected="@((user.Role=="admin"))">Admin</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-warning ms-2">Lưu</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form asp-action="DeleteUser" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -32,6 +32,10 @@ build_property.EnableCodeStyleSeverity =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxBY2Nlc3NEZW5pZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/himar/Desktop/bmtt_ttnt/demo_project/Views/Admin/ManageUsers.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cTWFuYWdlVXNlcnMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/himar/Desktop/bmtt_ttnt/demo_project/Views/Home/AdminDashboard.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxBZG1pbkRhc2hib2FyZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
