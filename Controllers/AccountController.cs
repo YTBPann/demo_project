@@ -138,7 +138,8 @@ namespace OpenIDApp.Controllers
                 new Claim(ClaimTypes.Name, user.Name ?? "Người dùng"),
                 new Claim(ClaimTypes.Email, user.Email ?? ""),
                 new Claim(ClaimTypes.Role, user.Role ?? "guest"),
-                new Claim("picture", user.Picture ?? "")
+                new Claim("Picture", user.Picture ?? ""), 
+                new Claim("Provider", scheme)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
