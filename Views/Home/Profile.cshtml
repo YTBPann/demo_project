@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "Trang cá nhân";
+}
+
+<div class="container mt-5">
+    <h2>👤 Thông tin cá nhân</h2>
+    <div class="card p-4 shadow-sm mt-3" style="max-width: 600px;">
+        <div class="d-flex align-items-center mb-3">
+            <img src="@Model.Picture" alt="Avatar" class="rounded-circle me-3" width="80" height="80" />
+            <div>
+                <h4>@Model.Name</h4>
+                <p class="text-muted mb-0">@Model.Email</p>
+            </div>
+        </div>
+
+        <p><strong>Vai trò:</strong> @Model.Role</p>
+        <p><strong>Đăng nhập bằng:</strong> @Model.Provider</p>
+    </div>
+</div>

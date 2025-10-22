@@ -59,5 +59,19 @@ namespace OpenIDApp.Controllers
             ViewBag.UserName = User.FindFirstValue(ClaimTypes.Name);
             return View("StudentDashboard");
         }
+        [Authorize]
+        public IActionResult Profile()
+        {
+            var user = new
+            {
+                Name = User.Identity?.Name,
+                Email = User.FindFirst(ClaimTypes.Email)?.Value,
+                Provider = User.FindFirst("Provider")?.Value,
+                Picture = User.FindFirst("Picture")?.Value,
+                Role = User.FindFirst(ClaimTypes.Role)?.Value
+            };
+
+            return View(user);
+        }
     }
 }
