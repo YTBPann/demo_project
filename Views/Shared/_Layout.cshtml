@@ -27,9 +27,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
                         @if (User.Identity.IsAuthenticated)
                         {       
                             var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
@@ -52,6 +49,23 @@
                                     <a class="nav-link text-dark" asp-controller="Home" asp-action="StudentDashboard">Trang sinh viên</a>
                                 </li>
                             }
+                        }
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value?.ToLower();
+                            var dashboardAction = role switch
+                            {
+                                "admin" => "AdminDashboard",
+                                "teacher" => "TeacherDashboard",
+                                "student" => "StudentDashboard",
+                                _ => "Welcome"
+                            };
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Home" asp-action="@dashboardAction">
+                                    Trang của tôi
+                                </a>
+                            </li>
                         }
                     </ul>
                     <ul class="navbar-nav">

@@ -1,8 +1,8 @@
 @{
-    ViewData["Title"] = "Trang Sinh viên";
+    ViewData["Title"] = "Trang sinh viên";
 }
-<div class="container text-center mt-5">
-    <h2>Xin chào, @ViewBag.UserName 🎓</h2>
-    <p>Chào mừng bạn đến với trang học viên.</p>
-    <a class="btn btn-outline-danger" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+<div class="container mt-5">
+    <h2>🎓 Xin chào, @User.Identity.Name!</h2>
+    <p>Vai trò: <strong>Sinh viên</strong></p>
+    <p>Trang này hiển thị lịch thi, điểm số và môn học của bạn.</p>
 </div>
