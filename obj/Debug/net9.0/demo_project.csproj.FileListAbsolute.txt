@@ -10,6 +10,7 @@ C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\demo_project.pdb
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\AspNet.Security.OAuth.GitHub.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Humanizer.dll
+C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.Facebook.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.Google.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\bin\Debug\net9.0\Microsoft.Build.Locator.dll
@@ -197,3 +198,5 @@ C:\Users\himar\Desktop\bmtt_ttnt\demo_project\obj\Debug\net9.0\refint\demo_proje
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\obj\Debug\net9.0\demo_project.pdb
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\obj\Debug\net9.0\demo_project.genruntimeconfig.cache
 C:\Users\himar\Desktop\bmtt_ttnt\demo_project\obj\Debug\net9.0\ref\demo_project.dll
+C:\Users\himar\Desktop\bmtt_ttnt\demo_project\obj\Debug\net9.0\compressed\pdb4psrgsj-m6xcbp89r0.gz
+C:\Users\himar\Desktop\bmtt_ttnt\demo_project\obj\Debug\net9.0\compressed\m66lyd6ft4-8czl8uzwrj.gz

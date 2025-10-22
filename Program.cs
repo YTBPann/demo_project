@@ -60,6 +60,13 @@ builder.Services.AddAuthentication(options =>
     };
 })
 
+.AddFacebook(options =>
+{
+    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+    options.CallbackPath = "/signin-facebook";
+})
+
 .AddGitHub(options =>
 {
     options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"];
