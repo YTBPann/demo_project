@@ -36,6 +36,12 @@ namespace OpenIDApp.Controllers
             }
 
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            if (email == null)
+            {
+                TempData["Error"] = "Không tìm thấy người dùng.";
+                return RedirectToAction("Index");
+            }
+
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
             {
@@ -43,21 +49,29 @@ namespace OpenIDApp.Controllers
                 return RedirectToAction("Index");
             }
 
+            var role = user.Role?.ToLower() ?? "guest";
 
-            if (user.LastNameChange != null && user.LastNameChange > DateTime.Now.AddDays(-7))
+            if (role != "admin")
             {
-                TempData["Error"] = "Bạn chỉ có thể đổi tên sau 7 ngày.";
-                return RedirectToAction("Index");
+                // Nếu đã từng đổi tên, kiểm tra thời gian
+                if (user.LastNameChange != null && user.LastNameChange > DateTime.Now.AddDays(-7))
+                {
+                    var remaining = (user.LastNameChange.Value.AddDays(7) - DateTime.Now).TotalDays;
+                    TempData["Error"] = $"Bạn chỉ có thể đổi tên sau {Math.Ceiling(remaining)} ngày nữa.";
+                    return RedirectToAction("Index");
+                }
             }
 
+            // Cập nhật tên và thời điểm đổi
             user.Name = newName;
             user.LastNameChange = DateTime.Now;
+            user.UpdatedAt = DateTime.Now;
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Cập nhật tên thành công!";
 
-            // Cập nhật lại claim hiện tại để hiển thị ngay
+            // Cập nhật lại claim để hiển thị trên giao diện
             var claimsIdentity = (ClaimsIdentity)User.Identity!;
             var oldClaim = claimsIdentity.FindFirst(ClaimTypes.Name);
             if (oldClaim != null)
