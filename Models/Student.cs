@@ -12,6 +12,9 @@ namespace OpenIDApp.Models
         [Column("user_id")]
         public int UserId { get; set; }
 
+        [ForeignKey("UserId")] 
+        public User UserProfile { get; set; } = null!;
+
         [Column("student_code")]
         public string? StudentCode { get; set; }
 
@@ -23,8 +26,6 @@ namespace OpenIDApp.Models
 
         [Column("year")]
         public int? Year { get; set; }
-
-        public User User { get; set; } = null!;
 
         public ICollection<StudentExam> StudentExams { get; set; } = new List<StudentExam>();
     }

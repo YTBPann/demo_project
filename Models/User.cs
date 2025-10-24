@@ -26,5 +26,7 @@ namespace OpenIDApp.Models
         public Student? StudentProfile { get; set; }
 
         public Teacher? TeacherProfile { get; set; }
+
+        public DateTime? LastNameChange { get; set; }
     }
 }

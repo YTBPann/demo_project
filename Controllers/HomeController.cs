@@ -1,6 +1,10 @@
+using OpenIDApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication; 
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace OpenIDApp.Controllers
 {
@@ -102,7 +106,7 @@ namespace OpenIDApp.Controllers
                 user.Name = newName;
                 await _context.SaveChangesAsync();
 
-                // 🟢 Cập nhật lại claim đăng nhập để hiện tên mới ngay lập tức
+                // Cập nhật lại claim đăng nhập để hiện tên mới ngay lập tức
                 var claimsIdentity = (ClaimsIdentity)User.Identity!;
                 var oldNameClaim = claimsIdentity.FindFirst(ClaimTypes.Name);
                 if (oldNameClaim != null)
