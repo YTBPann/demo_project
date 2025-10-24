@@ -6,7 +6,6 @@ using OpenIDApp.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
-
 namespace OpenIDApp.Controllers
 {
     [Authorize]
@@ -43,6 +42,7 @@ namespace OpenIDApp.Controllers
                 TempData["Error"] = "Không tìm thấy người dùng.";
                 return RedirectToAction("Index");
             }
+
 
             if (user.LastNameChange != null && user.LastNameChange > DateTime.Now.AddDays(-7))
             {

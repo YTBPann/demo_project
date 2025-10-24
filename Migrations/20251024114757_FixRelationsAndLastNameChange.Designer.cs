@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OpenIDApp.Models;
 
@@ -11,9 +12,11 @@ using OpenIDApp.Models;
 namespace demo_project.Migrations
 {
     [DbContext(typeof(OpenIDContext))]
-    partial class OpenIDContextModelSnapshot : ModelSnapshot
+    [Migration("20251024114757_FixRelationsAndLastNameChange")]
+    partial class FixRelationsAndLastNameChange
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

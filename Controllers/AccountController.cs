@@ -103,17 +103,21 @@ namespace OpenIDApp.Controllers
             }
             var updated = false;
 
-            if (!string.IsNullOrWhiteSpace(name) && user.Name != name)
+            // Chỉ cập nhật tên nếu user chưa có tên (người mới tạo)
+            if (string.IsNullOrWhiteSpace(user.Name))
             {
-                user.Name = name;
+                user.Name = !string.IsNullOrWhiteSpace(name) ? name : (email ?? "Người dùng");
                 updated = true;
             }
+
+            //  Email vẫn nên được đồng bộ (đảm bảo liên kết provider)
             if (!string.IsNullOrWhiteSpace(email) && user.Email != email)
             {
                 user.Email = email;
                 updated = true;
             }
 
+            // Cập nhật avatar nếu có thay đổi
             if (!string.IsNullOrWhiteSpace(picture) && user.Picture != picture)
             {
                 user.Picture = picture;
