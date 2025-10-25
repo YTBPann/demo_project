@@ -51,22 +51,23 @@ namespace OpenIDApp.Controllers
 
             var role = user.Role?.ToLower() ?? "guest";
 
-            if (role != "admin")
-            {
-                // Nếu đã từng đổi tên, kiểm tra thời gian
-                if (user.LastNameChange != null && user.LastNameChange > DateTime.Now.AddDays(-7))
-                {
-                    var remaining = (user.LastNameChange.Value.AddDays(7) - DateTime.Now).TotalDays;
-                    TempData["Error"] = $"Bạn chỉ có thể đổi tên sau {Math.Ceiling(remaining)} ngày nữa.";
-                    return RedirectToAction("Index");
-                }
-            }
+            // if (role != "admin")
+            // {
+            //     // Nếu đã từng đổi tên, kiểm tra thời gian
+            //    if (user.LastNameChange != null && user.LastNameChange > DateTime.Now.AddDays(-7))
+            //    {
+            //        var remaining = (user.LastNameChange.Value.AddDays(7) - DateTime.Now).TotalDays;
+            //        TempData["Error"] = $"Bạn chỉ có thể đổi tên sau {Math.Ceiling(remaining)} ngày nữa.";
+            //        return RedirectToAction("Index");
+            //    }
+            //}
 
             // Cập nhật tên và thời điểm đổi
             user.Name = newName;
-            user.LastNameChange = DateTime.Now;
+            // user.LastNameChange = DateTime.Now;
             user.UpdatedAt = DateTime.Now;
             _context.Users.Update(user);
+            _context.Entry(user).State = EntityState.Modified; 
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Cập nhật tên thành công!";

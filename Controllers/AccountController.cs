@@ -50,6 +50,14 @@ namespace OpenIDApp.Controllers
             var name = externalClaims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
             var providerKey = externalClaims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             var picture = externalClaims.FirstOrDefault(c => c.Type == "picture")?.Value;
+            
+            // Fallback email cho GitHub & Facebook
+            if (string.IsNullOrEmpty(email))
+            {
+                email = externalClaims.FirstOrDefault(c => c.Type == "urn:github:email")?.Value
+                    ?? externalClaims.FirstOrDefault(c => c.Type == "urn:facebook:email")?.Value
+                    ?? externalClaims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value + "@noemail.local";
+            }    
 
             if (string.IsNullOrEmpty(providerKey))
             {

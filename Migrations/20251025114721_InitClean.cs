@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace demo_project.Migrations
 {
     /// <inheritdoc />
-    public partial class AddLastNameChangeToUsers : Migration
+    public partial class InitClean : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -67,17 +67,11 @@ namespace demo_project.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     major = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    year = table.Column<int>(type: "int", nullable: true),
-                    UserId1 = table.Column<int>(type: "int", nullable: true)
+                    year = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_students", x => x.student_id);
-                    table.ForeignKey(
-                        name: "FK_students_users_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "users",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_students_users_user_id",
                         column: x => x.user_id,
@@ -97,17 +91,11 @@ namespace demo_project.Migrations
                     teacher_code = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     department = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserId1 = table.Column<int>(type: "int", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_teachers", x => x.teacher_id);
-                    table.ForeignKey(
-                        name: "FK_teachers_users_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "users",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_teachers_users_user_id",
                         column: x => x.user_id,
@@ -239,12 +227,6 @@ namespace demo_project.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_students_UserId1",
-                table: "students",
-                column: "UserId1",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_subjects_teacher_id",
                 table: "subjects",
                 column: "teacher_id");
@@ -253,12 +235,6 @@ namespace demo_project.Migrations
                 name: "IX_teachers_user_id",
                 table: "teachers",
                 column: "user_id",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_teachers_UserId1",
-                table: "teachers",
-                column: "UserId1",
                 unique: true);
 
             migrationBuilder.CreateIndex(

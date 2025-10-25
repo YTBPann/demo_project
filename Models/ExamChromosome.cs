@@ -1,0 +1,43 @@
+using System;
+using System.Collections.Generic;
+
+namespace OpenIDApp.Models
+{
+    // Đại diện cho một cá thể trong thuật toán di truyền (một lịch thi hoàn chỉnh)
+    public class ExamChromosome
+    {
+        public List<ExamGene> Genes { get; set; } = new List<ExamGene>();
+        public double Fitness { get; set; } = 0.0;  // Độ thích nghi
+
+        public ExamChromosome Clone()
+        {
+            var clone = new ExamChromosome();
+            foreach (var gene in Genes)
+            {
+                clone.Genes.Add(gene.Clone());
+            }
+            clone.Fitness = this.Fitness;
+            return clone;
+        }
+    }
+
+    // Một gen đại diện cho 1 môn thi
+    public class ExamGene
+    {
+        public int SubjectId { get; set; }
+        public int RoomId { get; set; }
+        public DateTime StartTime { get; set; }
+        public int DurationMinutes { get; set; }
+
+        public ExamGene Clone()
+        {
+            return new ExamGene
+            {
+                SubjectId = this.SubjectId,
+                RoomId = this.RoomId,
+                StartTime = this.StartTime,
+                DurationMinutes = this.DurationMinutes
+            };
+        }
+    }
+}

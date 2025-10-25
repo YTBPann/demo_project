@@ -199,9 +199,6 @@ namespace demo_project.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime?>("LastNameChange")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<string>("Name")
                         .HasColumnType("longtext");
 

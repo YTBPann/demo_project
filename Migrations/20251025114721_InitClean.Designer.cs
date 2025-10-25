@@ -12,8 +12,8 @@ using OpenIDApp.Models;
 namespace demo_project.Migrations
 {
     [DbContext(typeof(OpenIDContext))]
-    [Migration("20251024112601_AddLastNameChangeToUsers")]
-    partial class AddLastNameChangeToUsers
+    [Migration("20251025114721_InitClean")]
+    partial class InitClean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -106,9 +106,6 @@ namespace demo_project.Migrations
                         .HasColumnType("int")
                         .HasColumnName("user_id");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
                     b.Property<int?>("Year")
                         .HasColumnType("int")
                         .HasColumnName("year");
@@ -116,9 +113,6 @@ namespace demo_project.Migrations
                     b.HasKey("StudentId");
 
                     b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId1")
                         .IsUnique();
 
                     b.ToTable("students");
@@ -186,15 +180,9 @@ namespace demo_project.Migrations
                         .HasColumnType("int")
                         .HasColumnName("user_id");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
                     b.HasKey("TeacherId");
 
                     b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId1")
                         .IsUnique();
 
                     b.ToTable("teachers");
@@ -279,17 +267,13 @@ namespace demo_project.Migrations
 
             modelBuilder.Entity("OpenIDApp.Models.Student", b =>
                 {
-                    b.HasOne("OpenIDApp.Models.User", "User")
-                        .WithOne()
+                    b.HasOne("OpenIDApp.Models.User", "UserProfile")
+                        .WithOne("StudentProfile")
                         .HasForeignKey("OpenIDApp.Models.Student", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OpenIDApp.Models.User", null)
-                        .WithOne("StudentProfile")
-                        .HasForeignKey("OpenIDApp.Models.Student", "UserId1");
-
-                    b.Navigation("User");
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("OpenIDApp.Models.StudentExam", b =>
@@ -322,17 +306,13 @@ namespace demo_project.Migrations
 
             modelBuilder.Entity("OpenIDApp.Models.Teacher", b =>
                 {
-                    b.HasOne("OpenIDApp.Models.User", "User")
-                        .WithOne()
+                    b.HasOne("OpenIDApp.Models.User", "UserProfile")
+                        .WithOne("TeacherProfile")
                         .HasForeignKey("OpenIDApp.Models.Teacher", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("OpenIDApp.Models.User", null)
-                        .WithOne("TeacherProfile")
-                        .HasForeignKey("OpenIDApp.Models.Teacher", "UserId1");
-
-                    b.Navigation("User");
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("OpenIDApp.Models.UserLogin", b =>

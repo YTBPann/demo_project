@@ -1,0 +1,12 @@
+@if (User.IsInRole("student"))
+{
+    <li class="nav-item">
+        <a class="nav-link" href="/Schedule/Student">Lịch thi của tôi</a>
+    </li>
+}
+@if (User.IsInRole("teacher"))
+{
+    <li class="nav-item">
+        <a class="nav-link" href="/Schedule/Teacher">Lịch giảng viên</a>
+    </li>
+}
