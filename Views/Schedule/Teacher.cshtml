@@ -1,12 +1,31 @@
-@if (User.IsInRole("student"))
-{
-    <li class="nav-item">
-        <a class="nav-link" href="/Schedule/Student">Lịch thi của tôi</a>
-    </li>
-}
-@if (User.IsInRole("teacher"))
-{
-    <li class="nav-item">
-        <a class="nav-link" href="/Schedule/Teacher">Lịch giảng viên</a>
-    </li>
-}
+@model IEnumerable<OpenIDApp.Models.Exam>
+
+<h2>Lịch dạy / coi thi của giảng viên</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Môn học</th>
+            <th>Phòng thi</th>
+            <th>Ngày thi</th>
+            <th>Thời lượng</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var exam in Model)
+            {
+                <tr>
+                    <td>@exam.Subject?.Name</td>
+                    <td>@exam.Room?.Name</td>
+                    <td>@exam.Date.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@exam.DurationMinutes phút</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-center">Chưa có lịch thi nào cho giảng viên này.</td></tr>
+        }
+    </tbody>
+</table>

@@ -73,6 +73,16 @@ builder.Services.AddAuthentication(options =>
     options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
     options.CallbackPath = "/signin-github";
 });
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000); // HTTP
+    options.ListenAnyIP(5001, listenOptions =>
+    {
+        // listenOptions.UseHttps("/etc/letsencrypt/live/panel.minefrog.io.vn/fullchain.pem",
+        //                       "/etc/letsencrypt/live/panel.minefrog.io.vn/privkey.pem");
+        listenOptions.UseHttps();
+    });
+});
 
 // mvc 
 builder.Services.AddControllersWithViews();
