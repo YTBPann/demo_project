@@ -5,6 +5,7 @@ using OpenIDApp.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,12 +77,12 @@ builder.Services.AddAuthentication(options =>
 builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5000); // HTTP
-    options.ListenAnyIP(5001, listenOptions =>
-    {
+    //options.ListenAnyIP(5001, listenOptions =>
+    //{
         // listenOptions.UseHttps("/etc/letsencrypt/live/panel.minefrog.io.vn/fullchain.pem",
         //                       "/etc/letsencrypt/live/panel.minefrog.io.vn/privkey.pem");
-        listenOptions.UseHttps();
-    });
+        //listenOptions.UseHttps();
+    //});
 });
 
 // mvc 
@@ -102,7 +103,11 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+});
 app.UseStaticFiles();
 app.UseCookiePolicy();
 app.UseRouting();
