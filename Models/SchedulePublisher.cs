@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,52 +18,130 @@ namespace OpenIDApp.Models
             _cfg = cfg;
         }
 
-        // Đẩy exam_plan -> exams (giờ LOCAL, KHÔNG UTC)
-        public async Task<int> PublishAsync()
+        public async Task Publish()
         {
-            // Đọc cấu hình
-            var baseDateLocal = DateTime.Parse(_cfg["ExamSchedule:BaseDateLocal"] ?? "2025-11-10").Date;
-            var duration      = int.Parse(_cfg["ExamSchedule:DurationMinutes"] ?? "90");
+            // ---- Tham số từ appsettings (có fallback) ----
+            var baseDateStr =
+                  _cfg["Scheduling:BaseDateLocal"]
+               ?? _cfg["Scheduling:BaseDate"]
+               ?? "2025-11-10";
+            var baseDate = DateOnly.Parse(baseDateStr);
 
-            // (tuỳ chọn) Xoá sạch exams trước khi publish
-            await _db.Database.ExecuteSqlRawAsync("DELETE FROM exams;");
+            int duration     = int.Parse(_cfg["Scheduling:DurationMinutes"] ?? "90");
+            int cap          = int.Parse(_cfg["Scheduling:RoomCapacity"]     ?? "45");
+            int slotsPerDay  = TimeSlot.SlotsPerDay; // 4 ca/ngày
 
-            // LẤY TỪ DbSet ĐÚNG TÊN: ExamPlans (số nhiều)
-            var plans = await _db.ExamPlans
-                .AsNoTracking()
-                .OrderBy(p => p.SubjectId)
+            // ---- Dọn dữ liệu cũ ----
+            _db.StudentExams.RemoveRange(_db.StudentExams);
+            _db.Exams.RemoveRange(_db.Exams);
+            await _db.SaveChangesAsync();
+
+            // ---- Sĩ số mỗi môn (từ student_subjects) ----
+            var enrolled = await _db.Set<StudentSubject>()
+                .GroupBy(x => x.SubjectId)
+                .Select(g => new { SubjectId = g.Key, Remaining = g.Count() })
                 .ToListAsync();
+            if (enrolled.Count == 0) return;
 
-            if (plans.Count == 0) return 0;
+            var remain = enrolled.ToDictionary(x => x.SubjectId, x => x.Remaining);
 
-            // Phòng mặc định nếu plan chưa có room
-            var defaultRoomId = await _db.Rooms
+            // ---- Danh sách phòng ----
+            var rooms = await _db.Rooms
                 .OrderBy(r => r.RoomId)
                 .Select(r => r.RoomId)
-                .FirstAsync();
+                .ToListAsync();
+            int R = rooms.Count; // số phòng khả dụng
 
-            foreach (var p in plans)
+            // ---- Lưu danh sách examId theo từng môn ----
+            var examsBySubject = new Dictionary<int, List<int>>();
+
+            // ---- Lặp theo "ca" (tick) ----
+            int tick = 0;
+            while (remain.Values.Any(v => v > 0))
             {
-                // 
-                var slotId = Math.Max(0, Math.Min(TimeSlot.SlotsPerDay - 1, p.SlotId));
-                var (startLocal, endLocal) = TimeSlot.GetSlotLocalTime(slotId);
+                // Ưu tiên môn còn đông
+                var order = remain.Where(kv => kv.Value > 0)
+                                  .OrderByDescending(kv => kv.Value)
+                                  .Select(kv => kv.Key)
+                                  .ToList();
+                if (order.Count == 0) break;
 
-                // 
-                var dtLocal = baseDateLocal.AddDays(Math.Max(0, p.DayIndex)).Add(startLocal);
-                dtLocal = DateTime.SpecifyKind(dtLocal, DateTimeKind.Unspecified);
-
-                //
-                var roomId = (p.RoomId > 0) ? p.RoomId : defaultRoomId;
-
-                _db.Exams.Add(new Exam
+                // Cấp tối đa R phòng trong ca này
+                var allocation = new List<int>();
+                int i = 0;
+                while (allocation.Count < R && i < order.Count)
                 {
-                    SubjectId       = p.SubjectId,
-                    RoomId          = roomId,
-                    Date            = dtLocal,
-                    DurationMinutes = (int)(endLocal - startLocal).TotalMinutes
-                });
+                    int s = order[i++];
+                    int roomsNeed = (int)Math.Ceiling(remain[s] / (double)cap);
+                    int free = R - allocation.Count;
+                    int take = Math.Min(roomsNeed, free);
+                    for (int t = 0; t < take; t++) allocation.Add(s);
+                }
+
+                // Thời gian của ca này
+                int dayIndex = tick / slotsPerDay;
+                int slotId   = tick % slotsPerDay;
+                var (start, _) = TimeSlot.GetSlotLocalTime(slotId); // TimeSpan
+                var when = baseDate
+                    .ToDateTime(TimeOnly.FromTimeSpan(start))  // <-- fix TimeOnly
+                    .AddDays(dayIndex);
+
+                // Tạo exams cho các phòng được cấp
+                for (int r = 0; r < allocation.Count; r++)
+                {
+                    int subjectId = allocation[r];
+                    int roomId    = rooms[r];
+
+                    _db.Exams.Add(new Exam
+                    {
+                        SubjectId       = subjectId,
+                        RoomId          = roomId,
+                        Date            = when,       // local time
+                        DurationMinutes = duration
+                    });
+                }
+                await _db.SaveChangesAsync();
+
+                // Lấy các exam vừa tạo
+                var createdNow = await _db.Exams
+                    .Where(e => e.Date == when)
+                    .OrderBy(e => e.RoomId)
+                    .Select(e => new { e.ExamId, e.SubjectId })
+                    .ToListAsync();
+
+                // Trừ sĩ số còn lại + gom examId theo môn
+                foreach (var x in createdNow)
+                {
+                    remain[x.SubjectId] = Math.Max(0, remain[x.SubjectId] - cap);
+                    if (!examsBySubject.TryGetValue(x.SubjectId, out var list))
+                        examsBySubject[x.SubjectId] = list = new List<int>();
+                    list.Add(x.ExamId);
+                }
+
+                tick++; // sang ca kế
             }
-            return await _db.SaveChangesAsync();
+
+            // ---- Gán sinh viên vào ca (mỗi phòng tối đa 'cap' SV) ----
+            var students = await _db.Set<StudentSubject>()
+                .OrderBy(x => x.SubjectId).ThenBy(x => x.StudentId)
+                .ToListAsync();
+
+            var counter = new Dictionary<int, int>(); // subjectId -> đã gán bao nhiêu SV
+            foreach (var ss in students)
+            {
+                counter.TryGetValue(ss.SubjectId, out var r);
+                int bucket = r / cap; // mỗi 'cap' SV chuyển sang exam tiếp theo của môn đó
+                var list = examsBySubject[ss.SubjectId];
+                if (bucket >= list.Count) bucket = list.Count - 1;
+
+                _db.StudentExams.Add(new StudentExam
+                {
+                    StudentId = ss.StudentId,
+                    ExamId    = list[bucket]
+                });
+                counter[ss.SubjectId] = r + 1;
+            }
+            await _db.SaveChangesAsync();
         }
     }
 }

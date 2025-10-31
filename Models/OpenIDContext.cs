@@ -15,9 +15,13 @@ namespace OpenIDApp.Models
         public DbSet<Exam> Exams { get; set; }
         public DbSet<StudentExam> StudentExams { get; set; }
         public DbSet<ExamPlan> ExamPlans { get; set; }
+        public DbSet<StudentSubject> StudentSubjects { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             // User sang UserLogin (1-n)
             modelBuilder.Entity<UserLogin>()
                 .HasOne(u => u.User)
@@ -75,15 +79,23 @@ namespace OpenIDApp.Models
                 e.HasKey(x => x.PlanId);
                 e.HasIndex(x => x.SubjectId).IsUnique();
                 e.HasOne(x => x.Subject)
-                .WithMany()
-                .HasForeignKey(x => x.SubjectId)
-                .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany()
+                    .HasForeignKey(x => x.SubjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(x => x.Room)
-                .WithMany()
-                .HasForeignKey(x => x.RoomId)
-                .OnDelete(DeleteBehavior.Restrict);
+                    .WithMany()
+                    .HasForeignKey(x => x.RoomId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
-        }
-        
+
+            // StudentSubject (bảng enroll SV -> Môn)
+            modelBuilder.Entity<StudentSubject>(e =>
+            {
+                e.ToTable("student_subjects");
+                e.HasKey(x => new { x.StudentId, x.SubjectId });
+                e.Property(x => x.StudentId).HasColumnName("student_id");
+                e.Property(x => x.SubjectId).HasColumnName("subject_id");
+            });
+        }      
     }
 }
