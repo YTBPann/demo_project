@@ -109,95 +109,34 @@ namespace OpenIDApp.Controllers
         [HttpPost]
         public IActionResult RunGA()
         {
-            var roomCap = _context.Rooms.AsNoTracking()
-                .ToDictionary(r => r.RoomId, r => r.Capacity);
+            var weeks   = int.Parse(_cfg["ExamSchedule:Weeks"] ?? "2");
+            var numDays = weeks * 7;
 
-            var teacherBySubj = _context.Subjects.AsNoTracking()
-                .Where(s => s.TeacherId != null)
-                .ToDictionary(s => s.SubjectId, s => s.TeacherId!.Value);
+            // Lấy danh sách môn, phòng
+            var subjectIds = _context.Subjects.Select(s => s.SubjectId).ToList();
+            var roomIds    = _context.Rooms.Select(r => r.RoomId).ToList();
 
-            var studentsBySubj = _context.StudentExams.AsNoTracking()
-                .Include(se => se.Exam).ThenInclude(e => e.Subject)
-                .GroupBy(se => se.Exam.SubjectId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(x => x.StudentId).ToHashSet()
-                );
+            //  tạo FitnessCalculator 
+            var fitness = new FitnessCalculator(_context, _cfg);
 
-            int weeks = _cfg.GetValue<int>("ExamSchedule:Weeks", 2);
-            int numDays = weeks * 7;
-
-            var tzId = _cfg.GetValue<string>("ExamSchedule:TimeZone") ?? "Asia/Ho_Chi_Minh";
-            var tz = TimeZoneInfo.FindSystemTimeZoneById(tzId);
-
-            var baseLocalStr = _cfg.GetValue<string>("ExamSchedule:BaseDateLocal") ?? "2025-11-10";
-            var baseLocal = DateTime.Parse(baseLocalStr);
-            var baseUtc = TimeZoneInfo.ConvertTimeToUtc(baseLocal, tz);
-
-            var slotPlan = new SlotPlan(baseUtc, numDays, tz);
-
-            Func<DateTime, int> dayOf  = dt => slotPlan.GetDayIndexFromUtc(dt);
-            Func<DateTime, int> slotOf = dt => 0;
-
-            var fitness = new FitnessCalculator(roomCap, teacherBySubj, studentsBySubj, null, dayOf, slotOf)
-            {
-                MaxRoomsPerSlot = _cfg.GetValue<int>("ExamSchedule:MaxRoomsPerSlot", 4)
-            };
-
-            var subjectIds = _context.Subjects.AsNoTracking()
-                .Select(s => s.SubjectId).OrderBy(x => x).ToList();
-
-            var roomIds = _context.Rooms.AsNoTracking()
-                .Select(r => r.RoomId).OrderBy(x => x).ToList();
-
-            var ga = new GeneticAlgorithm(fitness, subjectIds, roomIds, numDays,
-                populationSize: 80, generations: 300, mutationRate: 0.08);
+            // chạy GA
+            var ga = new GeneticAlgorithm(
+                fitness,
+                subjectIds,
+                roomIds,
+                numDays,
+                populationSize: 120,
+                generations: 400,
+                mutationRate: 0.10
+            );
 
             var best = ga.Run();
+
+            // xuất exam_plan 
             ga.SavePlan(_context, best);
 
-            return Ok(new { best.Fitness, Genes = best.Genes.Count });
-        }
-
-        [Authorize(Roles = "admin")]
-        [HttpPost]
-        public IActionResult Publish()
-        {
-            int weeks = _cfg.GetValue<int>("ExamSchedule:Weeks", 2);
-            int numDays = weeks * 7;
-
-            var tzId = _cfg.GetValue<string>("ExamSchedule:TimeZone") ?? "Asia/Ho_Chi_Minh";
-            var tz = TimeZoneInfo.FindSystemTimeZoneById(tzId);
-
-            var baseLocalStr = _cfg.GetValue<string>("ExamSchedule:BaseDateLocal") ?? "2025-11-10";
-            var baseLocal = DateTime.Parse(baseLocalStr);
-            var baseUtc = TimeZoneInfo.ConvertTimeToUtc(baseLocal, tz);
-
-            int duration = _cfg.GetValue<int>("ExamSchedule:DurationMinutes", 90);
-
-            var slotPlan = new SlotPlan(baseUtc, numDays, tz);
-            var publisher = new SchedulePublisher(slotPlan, duration);
-
-            var plans = _context.ExamPlans.AsNoTracking().ToList();
-
-            _context.Database.ExecuteSqlRaw(@"
-                DELETE e FROM exams e
-                JOIN subjects s ON s.subject_id = e.subject_id
-            ");
-
-            foreach (var p in plans)
-            {
-                var startUtc = publisher.ToStartUtc(p.DayIndex, p.SlotId);
-                var endUtc   = publisher.ToEndUtc(p.DayIndex, p.SlotId);
-                int minutes  = (int)(endUtc - startUtc).TotalMinutes;
-
-                _context.Database.ExecuteSqlRaw(@"
-                    INSERT INTO exams (subject_id, room_id, date, duration_minutes)
-                    VALUES ({0}, {1}, {2}, {3})
-                ", p.SubjectId, p.RoomId, startUtc, minutes);
-            }
-
-            return Ok(new { Published = plans.Count });
+            TempData["msg"] = $"GA done. Fitness = {best.Fitness}";
+            return RedirectToAction(nameof(Plan));
         }
     }
 }

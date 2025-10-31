@@ -21,7 +21,7 @@ namespace OpenIDApp.Models
     }
 
     // Một gen đại diện cho 1 môn thi
-    public partial class ExamGene
+    public class ExamGene
     {
         public int SubjectId { get; set; }
         public int RoomId { get; set; }
