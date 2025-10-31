@@ -83,7 +83,7 @@ namespace OpenIDApp.Models
                 else if (n > cap)         score -= (n - cap) * (PenaltyOverCapacity * 0.5);
             }
 
-            // 2) Trùng lịch SV + 3) Trùng lịch GV + 4) Số phòng/slot
+            // Trùng lịch SV + Trùng lịch GV + Số phòng/slot
             var bySlot = chromo.Genes.GroupBy(g => {
                 var (d, s) = ResolveSlot(g, _dayIndexOf, _slotIdOf);
                 return new { Day = d, Slot = s };

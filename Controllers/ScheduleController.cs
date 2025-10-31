@@ -26,36 +26,34 @@ namespace OpenIDApp.Controllers
         [Authorize(Roles = "student")]
         public async Task<IActionResult> Student()
         {
+            // 
             var email = User.FindFirst(ClaimTypes.Email)?.Value
                         ?? User.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
-            var displayName = User.Identity?.Name;
 
-            var user = await _context.Users.FirstOrDefaultAsync(u =>
-                (email != null && u.Email == email) ||
-                (email == null && displayName != null && u.Name == displayName));
-
+            // 
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user == null)
             {
-                TempData["Error"] = "Không tìm thấy thông tin người dùng hiện tại.";
+                TempData["Error"] = "Không tìm thấy người dùng hiện tại.";
                 return RedirectToAction("Welcome", "Home");
             }
-
             var student = await _context.Students.FirstOrDefaultAsync(s => s.UserId == user.Id);
             if (student == null)
             {
-                TempData["Error"] = "Tài khoản này không gắn với hồ sơ sinh viên.";
+                TempData["Error"] = "Tài khoản này chưa gắn hồ sơ sinh viên.";
                 return RedirectToAction("Welcome", "Home");
             }
 
-            var exams = await _context.StudentExams
+            // 
+            var myExams = await _context.StudentExams
                 .Where(se => se.StudentId == student.StudentId)
                 .Include(se => se.Exam).ThenInclude(e => e.Subject)
                 .Include(se => se.Exam).ThenInclude(e => e.Room)
-                .Select(se => se.Exam)
+                .Select(se => se.Exam!)
                 .OrderBy(e => e.Date)
                 .ToListAsync();
 
-            return View(exams);
+            return View(myExams);
         }
 
         [Authorize(Roles = "teacher")]
@@ -139,7 +137,7 @@ namespace OpenIDApp.Controllers
                 roomCap,
                 teacherBySubj,
                 studentsBySubject,
-                null, null, null
+                null, null, null // không cần map thời gian ở bước GA
             );
 
             // 
@@ -161,7 +159,60 @@ namespace OpenIDApp.Controllers
             // 
             ga.SavePlan(_context, best);
 
-            TempData["msg"] = $"GA done. Fitness = {best.Fitness}";
+            // 
+            var planRows = _context.Database
+                .ExecuteSqlRaw("SELECT 1"); 
+
+            TempData["msg"] = $"GA saved {best.Genes.Count} subjects to exam_plan.";
+            return RedirectToAction(nameof(Plan));
+        }
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public async Task<IActionResult> Publish()
+        {
+            // 
+            var weeks    = int.Parse(_cfg["ExamSchedule:Weeks"] ?? "2");
+            var numDays  = Math.Max(1, weeks * 7);
+            var baseLocal = DateTime.Parse(_cfg["ExamSchedule:BaseDateLocal"] ?? "2025-11-10").Date;
+
+            // 
+            var plans = await _context.ExamPlans.AsNoTracking().ToListAsync();
+            if (plans.Count == 0)
+            {
+                TempData["Error"] = "exam_plan đang rỗng — hãy Run GA trước.";
+                return RedirectToAction(nameof(Plan));
+            }
+
+            // 
+            var subjectIds = plans.Select(p => p.SubjectId).ToList();
+            var oldExams   = _context.Exams.Where(e => subjectIds.Contains(e.SubjectId));
+            _context.Exams.RemoveRange(oldExams);
+            await _context.SaveChangesAsync();
+
+            // 
+            var firstRoomId = await _context.Rooms.Select(r => r.RoomId).OrderBy(id => id).FirstAsync();
+
+            foreach (var p in plans)
+            {
+                var dayIdx = p.DayIndex < 0 ? 0 : p.DayIndex;
+                var slotId = p.SlotId   < 0 ? 0 : Math.Min(TimeSlot.SlotsPerDay - 1, p.SlotId);
+
+                var (startLocal, endLocal) = TimeSlot.GetSlotLocalTime(slotId);
+                var start   = baseLocal.AddDays(dayIdx).Add(startLocal);               // <-- LOCAL
+                var minutes = (int)(endLocal - startLocal).TotalMinutes;
+
+                var roomId = p.RoomId > 0 ? p.RoomId : firstRoomId;
+
+                _context.Exams.Add(new Exam {
+                    SubjectId        = p.SubjectId,
+                    RoomId           = roomId,
+                    Date             = start,      // LƯU LOCAL TIME
+                    DurationMinutes  = minutes
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["msg"] = $"Publish xong {plans.Count} kỳ thi (giờ LOCAL).";
             return RedirectToAction(nameof(Plan));
         }
     }

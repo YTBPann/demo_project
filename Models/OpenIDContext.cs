@@ -68,6 +68,21 @@ namespace OpenIDApp.Models
                 .HasOne(se => se.Exam)
                 .WithMany(e => e.StudentExams)
                 .HasForeignKey(se => se.ExamId);
+
+            // ExamPlan
+            modelBuilder.Entity<ExamPlan>(e =>
+            {
+                e.HasKey(x => x.PlanId);
+                e.HasIndex(x => x.SubjectId).IsUnique();
+                e.HasOne(x => x.Subject)
+                .WithMany()
+                .HasForeignKey(x => x.SubjectId)
+                .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(x => x.Room)
+                .WithMany()
+                .HasForeignKey(x => x.RoomId)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
         }
         
     }

@@ -1,22 +1,66 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenIDApp.Models
 {
     public class SchedulePublisher
     {
-        private readonly SlotPlan _plan;
-        private readonly int _durationMinutes;
+        private readonly OpenIDContext _db;
+        private readonly IConfiguration _cfg;
 
-        public SchedulePublisher(SlotPlan plan, int durationMinutes)
+        public SchedulePublisher(OpenIDContext db, IConfiguration cfg)
         {
-            _plan = plan;
-            _durationMinutes = durationMinutes;
+            _db = db;
+            _cfg = cfg;
         }
 
-        public DateTime ToStartUtc(int dayIndex, int slotId)
-            => _plan.GetSlotStartUtc(dayIndex, slotId);
+        // Đẩy exam_plan -> exams (giờ LOCAL, KHÔNG UTC)
+        public async Task<int> PublishAsync()
+        {
+            // Đọc cấu hình
+            var baseDateLocal = DateTime.Parse(_cfg["ExamSchedule:BaseDateLocal"] ?? "2025-11-10").Date;
+            var duration      = int.Parse(_cfg["ExamSchedule:DurationMinutes"] ?? "90");
 
-        public DateTime ToEndUtc(int dayIndex, int slotId)
-            => _plan.GetSlotEndUtc(dayIndex, slotId);
+            // (tuỳ chọn) Xoá sạch exams trước khi publish
+            await _db.Database.ExecuteSqlRawAsync("DELETE FROM exams;");
+
+            // LẤY TỪ DbSet ĐÚNG TÊN: ExamPlans (số nhiều)
+            var plans = await _db.ExamPlans
+                .AsNoTracking()
+                .OrderBy(p => p.SubjectId)
+                .ToListAsync();
+
+            if (plans.Count == 0) return 0;
+
+            // Phòng mặc định nếu plan chưa có room
+            var defaultRoomId = await _db.Rooms
+                .OrderBy(r => r.RoomId)
+                .Select(r => r.RoomId)
+                .FirstAsync();
+
+            foreach (var p in plans)
+            {
+                // Bảo vệ chỉ số
+                var slotId = Math.Max(0, Math.Min(TimeSlot.SlotsPerDay - 1, p.SlotId));
+                var (startLocal, endLocal) = TimeSlot.GetSlotLocalTime(slotId);
+
+                // Ghép ngày + giờ LOCAL (DateTimeKind.Unspecified để tránh drift UTC)
+                var dtLocal = baseDateLocal.AddDays(Math.Max(0, p.DayIndex)).Add(startLocal);
+                dtLocal = DateTime.SpecifyKind(dtLocal, DateTimeKind.Unspecified);
+
+                _db.Exams.Add(new Exam
+                {
+                    SubjectId       = p.SubjectId,
+                    RoomId          = p.RoomId ?? defaultRoomId,
+                    Date            = dtLocal,                       // LƯU LOCAL
+                    DurationMinutes = (int)(endLocal - startLocal).TotalMinutes
+                });
+            }
+
+            return await _db.SaveChangesAsync();
+        }
     }
 }
