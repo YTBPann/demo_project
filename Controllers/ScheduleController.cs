@@ -109,17 +109,43 @@ namespace OpenIDApp.Controllers
         [HttpPost]
         public IActionResult RunGA()
         {
+            // 
             var weeks   = int.Parse(_cfg["ExamSchedule:Weeks"] ?? "2");
             var numDays = weeks * 7;
 
-            // Lấy danh sách môn, phòng
+            // 
+            var roomCap = _context.Rooms
+                .Select(r => new { r.RoomId, r.Capacity })
+                .ToDictionary(x => x.RoomId, x => x.Capacity);
+
+            // 
+            var teacherBySubj = _context.Subjects
+                .Select(s => new { s.SubjectId, TeacherId = (int?)s.TeacherId })
+                .ToDictionary(x => x.SubjectId, x => x.TeacherId ?? 0);
+
+            // 
+            var studentsBySubject = _context.StudentExams
+                .Include(se => se.Exam)
+                .Where(se => se.Exam != null)
+                .AsEnumerable()
+                .GroupBy(se => se.Exam!.SubjectId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(se => se.StudentId).ToHashSet()
+                );
+
+            // 
+            var fitness = new FitnessCalculator(
+                roomCap,
+                teacherBySubj,
+                studentsBySubject,
+                null, null, null
+            );
+
+            // 
             var subjectIds = _context.Subjects.Select(s => s.SubjectId).ToList();
             var roomIds    = _context.Rooms.Select(r => r.RoomId).ToList();
 
-            //  tạo FitnessCalculator 
-            var fitness = new FitnessCalculator(_context, _cfg);
-
-            // chạy GA
             var ga = new GeneticAlgorithm(
                 fitness,
                 subjectIds,
@@ -132,7 +158,7 @@ namespace OpenIDApp.Controllers
 
             var best = ga.Run();
 
-            // xuất exam_plan 
+            // 
             ga.SavePlan(_context, best);
 
             TempData["msg"] = $"GA done. Fitness = {best.Fitness}";
