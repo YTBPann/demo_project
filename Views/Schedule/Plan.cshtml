@@ -1,0 +1,33 @@
+@model IEnumerable<OpenIDApp.Models.ExamPlan>
+@{
+    ViewData["Title"] = "Kế hoạch thi (rời rạc)";
+}
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Day</th>
+      <th>Slot</th>
+      <th>Phòng</th>
+      <th>Môn</th>
+      <th>GV</th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach (var p in Model.OrderBy(x => x.DayIndex).ThenBy(x => x.SlotId)) {
+      <tr>
+        <td>@p.DayIndex</td>
+        <td>
+            @{
+                var label = p.SlotId switch { 0=>"Sáng 7:00",1=>"Sáng 9:30",2=>"Chiều 13:00",3=>"Chiều 15:30",_=>"?" };
+            }
+            @label
+        </td>
+        <td>@p.Room?.Name (@p.RoomId)</td>
+        <td>@p.Subject?.Name (@p.SubjectId)</td>
+        <td>@p.Subject?.TeacherId</td>
+      </tr>
+  }
+  </tbody>
+</table>

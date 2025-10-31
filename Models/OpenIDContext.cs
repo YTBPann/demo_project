@@ -14,6 +14,7 @@ namespace OpenIDApp.Models
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Exam> Exams { get; set; }
         public DbSet<StudentExam> StudentExams { get; set; }
+        public DbSet<ExamPlan> ExamPlans { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,14 +28,14 @@ namespace OpenIDApp.Models
             // User sang Student (1-1)
             modelBuilder.Entity<Student>()
                 .HasOne(s => s.UserProfile)
-                .WithOne(u => u.StudentProfile)  
+                .WithOne(u => u.StudentProfile)
                 .HasForeignKey<Student>(s => s.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // User sang Teacher (1-1)
             modelBuilder.Entity<Teacher>()
                 .HasOne(t => t.UserProfile)
-                .WithOne(u => u.TeacherProfile)  
+                .WithOne(u => u.TeacherProfile)
                 .HasForeignKey<Teacher>(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -68,5 +69,6 @@ namespace OpenIDApp.Models
                 .WithMany(e => e.StudentExams)
                 .HasForeignKey(se => se.ExamId);
         }
+        
     }
 }

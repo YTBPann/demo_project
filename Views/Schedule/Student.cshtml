@@ -1,31 +1,34 @@
 @model IEnumerable<OpenIDApp.Models.Exam>
+@{
+    ViewData["Title"] = "Lịch thi của tôi";
+}
+<h2 class="mb-3">Lịch thi của tôi</h2>
 
-<h2>Lịch thi của sinh viên</h2>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Môn học</th>
-            <th>Phòng thi</th>
-            <th>Ngày thi</th>
-            <th>Thời lượng</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Bạn chưa có kỳ thi nào được đăng ký.</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Môn học</th>
+                <th>Phòng thi</th>
+                <th>Ngày thi</th>
+                <th>Thời lượng</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var e in Model)
         {
-            foreach (var exam in Model)
-            {
-                <tr>
-                    <td>@exam.Subject?.Name</td>
-                    <td>@exam.Room?.Name</td>
-                    <td>@exam.Date.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@exam.DurationMinutes phút</td>
-                </tr>
-            }
+            <tr>
+                <td>@e.Subject?.Name</td>
+                <td>@e.Room?.Name</td>
+                <td>@e.Date.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@e.DurationMinutes phút</td>
+            </tr>
         }
-        else
-        {
-            <tr><td colspan="4" class="text-center">Chưa có lịch thi nào.</td></tr>
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+}
