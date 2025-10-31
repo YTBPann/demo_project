@@ -43,23 +43,25 @@ namespace OpenIDApp.Models
 
             foreach (var p in plans)
             {
-                // Bảo vệ chỉ số
+                // 
                 var slotId = Math.Max(0, Math.Min(TimeSlot.SlotsPerDay - 1, p.SlotId));
                 var (startLocal, endLocal) = TimeSlot.GetSlotLocalTime(slotId);
 
-                // Ghép ngày + giờ LOCAL (DateTimeKind.Unspecified để tránh drift UTC)
+                // 
                 var dtLocal = baseDateLocal.AddDays(Math.Max(0, p.DayIndex)).Add(startLocal);
                 dtLocal = DateTime.SpecifyKind(dtLocal, DateTimeKind.Unspecified);
+
+                //
+                var roomId = (p.RoomId > 0) ? p.RoomId : defaultRoomId;
 
                 _db.Exams.Add(new Exam
                 {
                     SubjectId       = p.SubjectId,
-                    RoomId          = p.RoomId ?? defaultRoomId,
-                    Date            = dtLocal,                       // LƯU LOCAL
+                    RoomId          = roomId,
+                    Date            = dtLocal,
                     DurationMinutes = (int)(endLocal - startLocal).TotalMinutes
                 });
             }
-
             return await _db.SaveChangesAsync();
         }
     }
