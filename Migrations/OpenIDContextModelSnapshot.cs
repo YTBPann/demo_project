@@ -55,6 +55,40 @@ namespace demo_project.Migrations
 
                     b.ToTable("exams");
                 });
+            modelBuilder.Entity("OpenIDApp.Models.ExamPlan", b =>
+                {
+                    b.Property<int>("PlanId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("plan_id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("PlanId"));
+
+                    b.Property<int>("DayIndex")
+                        .HasColumnType("int")
+                        .HasColumnName("day_index");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
+
+                    b.Property<int>("SlotId")
+                        .HasColumnType("int")
+                        .HasColumnName("slot_id");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int")
+                        .HasColumnName("subject_id");
+
+                    b.HasKey("PlanId");
+
+                    b.HasIndex("RoomId");
+
+                    b.HasIndex("SubjectId")
+                        .IsUnique();
+
+                    b.ToTable("exam_plan");
+                });
 
             modelBuilder.Entity("OpenIDApp.Models.Room", b =>
                 {
@@ -130,6 +164,21 @@ namespace demo_project.Migrations
                     b.HasIndex("ExamId");
 
                     b.ToTable("student_exams");
+                });
+
+            modelBuilder.Entity("OpenIDApp.Models.StudentSubject", b =>
+                {
+                    b.Property<int>("StudentId")
+                        .HasColumnType("int")
+                        .HasColumnName("student_id");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int")
+                        .HasColumnName("subject_id");
+
+                    b.HasKey("StudentId", "SubjectId");
+
+                    b.ToTable("student_subjects");
                 });
 
             modelBuilder.Entity("OpenIDApp.Models.Subject", b =>
@@ -261,6 +310,25 @@ namespace demo_project.Migrations
 
                     b.Navigation("Subject");
                 });
+            
+            modelBuilder.Entity("OpenIDApp.Models.ExamPlan", b =>
+                {
+                    b.HasOne("OpenIDApp.Models.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("OpenIDApp.Models.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Room");
+
+                    b.Navigation("Subject");
+                });
 
             modelBuilder.Entity("OpenIDApp.Models.Student", b =>
                 {
@@ -290,6 +358,21 @@ namespace demo_project.Migrations
                     b.Navigation("Exam");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("OpenIDApp.Models.StudentSubject", b =>
+                {
+                    b.HasOne("OpenIDApp.Models.Student", null)
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OpenIDApp.Models.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("OpenIDApp.Models.Subject", b =>

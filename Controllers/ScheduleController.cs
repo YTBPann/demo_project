@@ -1,7 +1,7 @@
-// Controllers/ScheduleController.cs
 using System;
 using System.Linq;
 using System.Security.Claims;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -105,7 +105,7 @@ namespace OpenIDApp.Controllers
 
         [Authorize(Roles = "admin")]
         [HttpPost]
-        public IActionResult RunGA()
+        public async Task<IActionResult> RunGA()        
         {
             // 
             var weeks   = int.Parse(_cfg["ExamSchedule:Weeks"] ?? "2");
@@ -122,14 +122,12 @@ namespace OpenIDApp.Controllers
                 .ToDictionary(x => x.SubjectId, x => x.TeacherId ?? 0);
 
             // 
-            var studentsBySubject = _context.StudentExams
-                .Include(se => se.Exam)
-                .Where(se => se.Exam != null)
-                .AsEnumerable()
-                .GroupBy(se => se.Exam!.SubjectId)
-                .ToDictionary(
+            var studentsBySubject = await _context.StudentSubjects
+                .AsNoTracking()
+                .GroupBy(ss => ss.SubjectId)
+                .ToDictionaryAsync(
                     g => g.Key,
-                    g => g.Select(se => se.StudentId).ToHashSet()
+                    g => g.Select(ss => ss.StudentId).ToHashSet()
                 );
 
             // 
@@ -160,9 +158,6 @@ namespace OpenIDApp.Controllers
             ga.SavePlan(_context, best);
 
             // 
-            var planRows = _context.Database
-                .ExecuteSqlRaw("SELECT 1"); 
-
             TempData["msg"] = $"GA saved {best.Genes.Count} subjects to exam_plan.";
             return RedirectToAction(nameof(Plan));
         }
@@ -192,6 +187,7 @@ namespace OpenIDApp.Controllers
             // 
             var firstRoomId = await _context.Rooms.Select(r => r.RoomId).OrderBy(id => id).FirstAsync();
 
+            var newExams = new List<Exam>(plans.Count);
             foreach (var p in plans)
             {
                 var dayIdx = p.DayIndex < 0 ? 0 : p.DayIndex;
@@ -203,15 +199,44 @@ namespace OpenIDApp.Controllers
 
                 var roomId = p.RoomId > 0 ? p.RoomId : firstRoomId;
 
-                _context.Exams.Add(new Exam {
-                    SubjectId        = p.SubjectId,
-                    RoomId           = roomId,
-                    Date             = start,      // LƯU LOCAL TIME
-                    DurationMinutes  = minutes
-                });
+                var exam = new Exam
+                {
+                    SubjectId = p.SubjectId,
+                    RoomId = roomId,
+                    Date = start,      // LƯU LOCAL TIME
+                    DurationMinutes = minutes
+                };
+                
+                newExams.Add(exam);
+                _context.Exams.Add(exam);
             }
 
             await _context.SaveChangesAsync();
+            var examMap = newExams
+                .Where(e => e.ExamId > 0)
+                .ToDictionary(e => e.SubjectId, e => e.ExamId);
+
+            var studentSubjects = await _context.StudentSubjects
+                .AsNoTracking()
+                .Where(ss => examMap.ContainsKey(ss.SubjectId))
+                .ToListAsync();
+
+            if (studentSubjects.Count > 0)
+            {
+                var newStudentExams = studentSubjects
+                    .Select(ss => new StudentExam
+                    {
+                        StudentId = ss.StudentId,
+                        ExamId = examMap[ss.SubjectId]
+                    })
+                    .GroupBy(se => new { se.StudentId, se.ExamId })
+                    .Select(g => g.First())
+                    .ToList();
+
+                _context.StudentExams.AddRange(newStudentExams);
+                await _context.SaveChangesAsync();
+            }
+            
             TempData["msg"] = $"Publish xong {plans.Count} kỳ thi (giờ LOCAL).";
             return RedirectToAction(nameof(Plan));
         }

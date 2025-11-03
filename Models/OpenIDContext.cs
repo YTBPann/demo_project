@@ -95,6 +95,25 @@ namespace OpenIDApp.Models
                 e.HasKey(x => new { x.StudentId, x.SubjectId });
                 e.Property(x => x.StudentId).HasColumnName("student_id");
                 e.Property(x => x.SubjectId).HasColumnName("subject_id");
+
+                e.HasOne<Student>()
+                    .WithMany()
+                    .HasForeignKey(x => x.StudentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne<Subject>()
+                    .WithMany()
+                    .HasForeignKey(x => x.SubjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<ExamPlanRoom>(e =>
+            {
+                e.HasKey(x => x.Id);
+                e.HasIndex(x => new { x.SubjectId, x.DayIndex, x.SlotId, x.RoomId }).IsUnique();
+                e.HasOne(x => x.Subject).WithMany().HasForeignKey(x => x.SubjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(x => x.Room).WithMany().HasForeignKey(x => x.RoomId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }      
     }

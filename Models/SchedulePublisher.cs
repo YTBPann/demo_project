@@ -1,9 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OpenIDApp.Models
 {
@@ -20,7 +15,7 @@ namespace OpenIDApp.Models
 
         public async Task Publish()
         {
-            // ---- Tham số từ appsettings (có fallback) ----
+            //  Tham số từ appsettings (có fallback) 
             var baseDateStr =
                   _cfg["Scheduling:BaseDateLocal"]
                ?? _cfg["Scheduling:BaseDate"]
@@ -31,12 +26,12 @@ namespace OpenIDApp.Models
             int cap          = int.Parse(_cfg["Scheduling:RoomCapacity"]     ?? "45");
             int slotsPerDay  = TimeSlot.SlotsPerDay; // 4 ca/ngày
 
-            // ---- Dọn dữ liệu cũ ----
+            // Dọn dữ liệu cũ 
             _db.StudentExams.RemoveRange(_db.StudentExams);
             _db.Exams.RemoveRange(_db.Exams);
             await _db.SaveChangesAsync();
 
-            // ---- Sĩ số mỗi môn (từ student_subjects) ----
+            //  Sĩ số mỗi môn (từ student_subjects) 
             var enrolled = await _db.Set<StudentSubject>()
                 .GroupBy(x => x.SubjectId)
                 .Select(g => new { SubjectId = g.Key, Remaining = g.Count() })
@@ -45,17 +40,17 @@ namespace OpenIDApp.Models
 
             var remain = enrolled.ToDictionary(x => x.SubjectId, x => x.Remaining);
 
-            // ---- Danh sách phòng ----
+            //  Danh sách phòng 
             var rooms = await _db.Rooms
                 .OrderBy(r => r.RoomId)
                 .Select(r => r.RoomId)
                 .ToListAsync();
             int R = rooms.Count; // số phòng khả dụng
 
-            // ---- Lưu danh sách examId theo từng môn ----
+            //  Lưu danh sách examId theo từng môn 
             var examsBySubject = new Dictionary<int, List<int>>();
 
-            // ---- Lặp theo "ca" (tick) ----
+            //  Lặp theo "ca" (tick) 
             int tick = 0;
             while (remain.Values.Any(v => v > 0))
             {
@@ -121,7 +116,7 @@ namespace OpenIDApp.Models
                 tick++; // sang ca kế
             }
 
-            // ---- Gán sinh viên vào ca (mỗi phòng tối đa 'cap' SV) ----
+            // Gán sinh viên vào ca (mỗi phòng tối đa 'cap' SV)
             var students = await _db.Set<StudentSubject>()
                 .OrderBy(x => x.SubjectId).ThenBy(x => x.StudentId)
                 .ToListAsync();

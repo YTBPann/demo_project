@@ -204,7 +204,61 @@ namespace demo_project.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+            migrationBuilder.CreateTable(
+                name: "exam_plan",
+                columns: table => new
+                {
+                    plan_id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    subject_id = table.Column<int>(type: "int", nullable: false),
+                    day_index = table.Column<int>(type: "int", nullable: false),
+                    slot_id = table.Column<int>(type: "int", nullable: false),
+                    room_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_exam_plan", x => x.plan_id);
+                    table.ForeignKey(
+                        name: "FK_exam_plan_rooms_room_id",
+                        column: x => x.room_id,
+                        principalTable: "rooms",
+                        principalColumn: "room_id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_exam_plan_subjects_subject_id",
+                        column: x => x.subject_id,
+                        principalTable: "subjects",
+                        principalColumn: "subject_id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "student_subjects",
+                columns: table => new
+                {
+                    student_id = table.Column<int>(type: "int", nullable: false),
+                    subject_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_student_subjects", x => new { x.student_id, x.subject_id });
+                    table.ForeignKey(
+                        name: "FK_student_subjects_students_student_id",
+                        column: x => x.student_id,
+                        principalTable: "students",
+                        principalColumn: "student_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_student_subjects_subjects_subject_id",
+                        column: x => x.subject_id,
+                        principalTable: "subjects",
+                        principalColumn: "subject_id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            
             migrationBuilder.CreateIndex(
                 name: "IX_exams_room_id",
                 table: "exams",
@@ -214,6 +268,17 @@ namespace demo_project.Migrations
                 name: "IX_exams_subject_id",
                 table: "exams",
                 column: "subject_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_exam_plan_room_id",
+                table: "exam_plan",
+                column: "room_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_exam_plan_subject_id",
+                table: "exam_plan",
+                column: "subject_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_student_exams_exam_id",
@@ -247,8 +312,14 @@ namespace demo_project.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "exam_plan");
+
+            migrationBuilder.DropTable(
                 name: "student_exams");
 
+            migrationBuilder.DropTable(
+                name: "student_subjects");
+                
             migrationBuilder.DropTable(
                 name: "user_logins");
 
